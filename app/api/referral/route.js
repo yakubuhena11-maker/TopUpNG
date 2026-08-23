@@ -6,8 +6,8 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Not logged in" }, { status: 401 });
 
-  const referrals = listReferrals(user.id);
-  const count = countReferrals(user.id);
+  const referrals = await listReferrals(user.id);
+  const count = await countReferrals(user.id);
   const totalEarned = referrals.reduce((sum, r) => sum + r.reward_amount, 0);
 
   return NextResponse.json({
