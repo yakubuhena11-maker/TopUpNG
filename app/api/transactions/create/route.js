@@ -41,13 +41,13 @@ export async function POST(req) {
 
     await createTransaction({
       id, user_id: user.id, reference, phone,
-      email: user.email || `${user.phone}@topupng.local`, network, type,
+      email: user.email || `${user.phone}@topupng.com`, network, type,
       plan_code: plan_code || null, base_amount: baseAmountKobo, amount: amountKobo,
       payment_method: "paystack",
     });
 
     const payment = await initializePayment({
-      email: user.email || `${user.phone}@topupng.local`,
+      email: user.email || `${user.phone}@topupng.com`,
       amountNaira: finalAmount,
       reference,
       callback_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?paid=${reference}`,
