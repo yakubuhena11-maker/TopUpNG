@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 
 export default function SettingsForm({ user }) {
   const router = useRouter();
+  const [tab, setTab] = useState("details");
+
   const [name, setName] = useState(user.name || "");
   const [email, setEmail] = useState(user.email || "");
   const [saving, setSaving] = useState(false);
@@ -82,75 +84,92 @@ export default function SettingsForm({ user }) {
 
   return (
     <>
-      <div className="card-section">
-        <div className="card-title">Edit details</div>
-        <div className="field">
-          <label>Full name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" />
-        </div>
-        <div className="field">
-          <label>Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-        </div>
-        <div className="field">
-          <label>Phone number</label>
-          <input value={user.phone} disabled />
-        </div>
-        <button className="btn ghost" disabled={saving} onClick={saveChanges}>
-          {saving ? "Saving…" : "Save changes"}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        <button
+          onClick={() => setTab("details")}
+          className={tab === "details" ? "btn" : "btn ghost"}
+          style={{ flex: 1 }}
+        >
+          Edit details
+        </button>
+        <button
+          onClick={() => setTab("pin")}
+          className={tab === "pin" ? "btn" : "btn ghost"}
+          style={{ flex: 1 }}
+        >
+          Transaction PIN
         </button>
       </div>
 
-      <div className="card-section">
-        <div className="card-title">
-          {hasPin ? "Change transaction PIN" : "Set transaction PIN"}
-        </div>
-        {!hasPin && (
-          <p style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 10 }}>
-            Add a 4-digit PIN for extra security before purchases and wallet actions.
-          </p>
-        )}
-        {hasPin && (
+      {tab === "details" && (
+        <div className="card-section">
           <div className="field">
-            <label>Current PIN</label>
+            <label>Full name</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" />
+          </div>
+          <div className="field">
+            <label>Email</label>
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+          </div>
+          <div className="field">
+            <label>Phone number</label>
+            <input value={user.phone} disabled />
+          </div>
+          <button className="btn ghost" disabled={saving} onClick={saveChanges}>
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      )}
+
+      {tab === "pin" && (
+        <div className="card-section">
+          {!hasPin && (
+            <p style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 10 }}>
+              Add a 4-digit PIN for extra security before purchases and wallet actions.
+            </p>
+          )}
+          {hasPin && (
+            <div className="field">
+              <label>Current PIN</label>
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                value={currentPin}
+                onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, ""))}
+                placeholder="••••"
+              />
+            </div>
+          )}
+          <div className="field">
+            <label>New PIN</label>
             <input
               type="password"
               inputMode="numeric"
               maxLength={4}
-              value={currentPin}
-              onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, ""))}
+              value={newPin}
+              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
               placeholder="••••"
             />
           </div>
-        )}
-        <div className="field">
-          <label>New PIN</label>
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={4}
-            value={newPin}
-            onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
-            placeholder="••••"
-          />
+          <div className="field">
+            <label>Confirm PIN</label>
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={confirmPin}
+              onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+              placeholder="••••"
+            />
+          </div>
+          {pinError && <div className="error-text">{pinError}</div>}
+          {pinSuccess && <div style={{ color: "green", fontSize: 13 }}>{pinSuccess}</div>}
+          <button className="btn ghost" disabled={savingPin} onClick={savePin}>
+            {savingPin ? "Saving…" : hasPin ? "Change PIN" : "Set PIN"}
+          </button>
         </div>
-        <div className="field">
-          <label>Confirm PIN</label>
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={4}
-            value={confirmPin}
-            onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
-            placeholder="••••"
-          />
-        </div>
-        {pinError && <div className="error-text">{pinError}</div>}
-        {pinSuccess && <div style={{ color: "green", fontSize: 13 }}>{pinSuccess}</div>}
-        <button className="btn ghost" disabled={savingPin} onClick={savePin}>
-          {savingPin ? "Saving…" : hasPin ? "Change PIN" : "Set PIN"}
-        </button>
-      </div>
+      )}
 
       <button className="btn danger" disabled={loggingOut} onClick={handleLogout}>
         {loggingOut ? "Logging out…" : "Log out"}
