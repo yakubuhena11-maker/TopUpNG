@@ -82,75 +82,75 @@ export default function SettingsForm({ user }) {
 
   return (
     <>
-      <div className="section-label">Edit details</div>
-      <div className="field">
-        <label>Full name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" />
-      </div>
-      <div className="field">
-        <label>Email</label>
-        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-      </div>
-      <div className="field">
-        <label>Phone number</label>
-        <input value={user.phone} disabled />
-      </div>
-      <button className="btn ghost" disabled={saving} onClick={saveChanges}>
-        {saving ? "Saving…" : "Save changes"}
-      </button>
-
-      <div className="divider" />
-
-      <div className="section-label">
-        {hasPin ? "Change transaction PIN" : "Set transaction PIN"}
-      </div>
-      {!hasPin && (
-        <p style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 10 }}>
-          Add a 4-digit PIN for extra security before purchases and wallet actions.
-        </p>
-      )}
-      {hasPin && (
+      <div className="card-section">
+        <div className="card-title">Edit details</div>
         <div className="field">
-          <label>Current PIN</label>
+          <label>Full name</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" />
+        </div>
+        <div className="field">
+          <label>Email</label>
+          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+        </div>
+        <div className="field">
+          <label>Phone number</label>
+          <input value={user.phone} disabled />
+        </div>
+        <button className="btn ghost" disabled={saving} onClick={saveChanges}>
+          {saving ? "Saving…" : "Save changes"}
+        </button>
+      </div>
+
+      <div className="card-section">
+        <div className="card-title">
+          {hasPin ? "Change transaction PIN" : "Set transaction PIN"}
+        </div>
+        {!hasPin && (
+          <p style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 10 }}>
+            Add a 4-digit PIN for extra security before purchases and wallet actions.
+          </p>
+        )}
+        {hasPin && (
+          <div className="field">
+            <label>Current PIN</label>
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={currentPin}
+              onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, ""))}
+              placeholder="••••"
+            />
+          </div>
+        )}
+        <div className="field">
+          <label>New PIN</label>
           <input
             type="password"
             inputMode="numeric"
             maxLength={4}
-            value={currentPin}
-            onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, ""))}
+            value={newPin}
+            onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
             placeholder="••••"
           />
         </div>
-      )}
-      <div className="field">
-        <label>New PIN</label>
-        <input
-          type="password"
-          inputMode="numeric"
-          maxLength={4}
-          value={newPin}
-          onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
-          placeholder="••••"
-        />
+        <div className="field">
+          <label>Confirm PIN</label>
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            value={confirmPin}
+            onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+            placeholder="••••"
+          />
+        </div>
+        {pinError && <div className="error-text">{pinError}</div>}
+        {pinSuccess && <div style={{ color: "green", fontSize: 13 }}>{pinSuccess}</div>}
+        <button className="btn ghost" disabled={savingPin} onClick={savePin}>
+          {savingPin ? "Saving…" : hasPin ? "Change PIN" : "Set PIN"}
+        </button>
       </div>
-      <div className="field">
-        <label>Confirm PIN</label>
-        <input
-          type="password"
-          inputMode="numeric"
-          maxLength={4}
-          value={confirmPin}
-          onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
-          placeholder="••••"
-        />
-      </div>
-      {pinError && <div className="error-text">{pinError}</div>}
-      {pinSuccess && <div style={{ color: "green", fontSize: 13 }}>{pinSuccess}</div>}
-      <button className="btn ghost" disabled={savingPin} onClick={savePin}>
-        {savingPin ? "Saving…" : hasPin ? "Change PIN" : "Set PIN"}
-      </button>
-
-      <div className="divider" />
 
       <button className="btn danger" disabled={loggingOut} onClick={handleLogout}>
         {loggingOut ? "Logging out…" : "Log out"}
