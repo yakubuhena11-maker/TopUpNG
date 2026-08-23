@@ -96,3 +96,17 @@ h1{font-family:'Space Grotesk', sans-serif;font-size:26px;line-height:1.15;font-
 .profile-row .phone{font-family:'IBM Plex Mono';font-size:12px;color:var(--ink-soft);}
 .divider{height:1px;background:var(--line);margin:22px 0;}
 .main-pad{padding:0 20px;}
+.card-section {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.card-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 14px;
+}
