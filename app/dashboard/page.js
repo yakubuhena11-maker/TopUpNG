@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
-import { listTransactions } from "@/lib/db";
+import { listTransactions, getTransaction, updateTransactionStatus } from "@/lib/db";
+import { verifyPayment } from "@/lib/paystack";
+import { purchaseAirtime, purchaseData } from "@/lib/vtpass";
 import WalletActions from "./WalletActions";
 
 function initials(name, phone) {
@@ -13,9 +15,55 @@ function formatNaira(kobo) {
   return `₦${(kobo / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 }
 
-export default async function DashboardPage() {
+async function tryCompleteTransaction(reference) {
+  if (!reference) return;
+  const tx = await getTransaction(reference);
+  if (!tx || tx.status === "success") return;
+
+  try {
+    if (tx.payment_method !== "wallet") {
+      const result = await verifyPayment(reference);
+      if (result.data.status !== "success") {
+        await updateTransactionStatus(reference, "failed");
+        return;
+      }
+    }
+
+    const baseAmountNaira = tx.base_amount / 100;
+    let vtpassResult;
+    if (tx.type === "airtime") {
+      vtpassResult = await purchaseAirtime({
+        requestId: tx.reference,
+        phone: tx.phone,
+        network: tx.network,
+        amountNaira: baseAmountNaira,
+      });
+    } else {
+      vtpassResult = await purchaseData({
+        requestId: tx.reference,
+        phone: tx.phone,
+        network: tx.network,
+        variationCode: tx.plan_code,
+      });
+    }
+
+    await updateTransactionStatus(reference, "success", {
+      vtpass_ref: vtpassResult?.content?.transactions?.transactionId || null,
+    });
+  } catch (err) {
+    console.error("dashboard auto-verify error:", err.response?.data || err.message);
+    await updateTransactionStatus(reference, "failed");
+  }
+}
+
+export default async function DashboardPage({ searchParams }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  const params = await searchParams;
+  if (params?.paid) {
+    await tryCompleteTransaction(params.paid);
+  }
 
   const recent = await listTransactions(user.id, 6);
 
