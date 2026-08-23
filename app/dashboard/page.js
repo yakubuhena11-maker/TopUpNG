@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const recent = listTransactions(user.id, 6);
+  const recent = await listTransactions(user.id, 6);
 
   return (
     <div className="wrap">
@@ -85,4 +85,4 @@ export default async function DashboardPage() {
       </div>
     </div>
   );
-    }
+}
