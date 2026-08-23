@@ -16,7 +16,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const markupPercent = parseFloat(getSetting("purchase_markup_percent") || "0");
+    const markupPercent = parseFloat((await getSetting("purchase_markup_percent")) || "0");
     const baseAmount = amount;
     const finalAmount = amount * (1 + markupPercent / 100);
 
@@ -29,17 +29,17 @@ export async function POST(req) {
       if (user.wallet_balance < amountKobo) {
         return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 });
       }
-      createTransaction({
+      await createTransaction({
         id, user_id: user.id, reference, phone,
         email: user.email || null, network, type,
         plan_code: plan_code || null, base_amount: baseAmountKobo, amount: amountKobo,
         payment_method: "wallet",
       });
-      adjustWalletBalance(user.id, -amountKobo);
+      await adjustWalletBalance(user.id, -amountKobo);
       return NextResponse.json({ reference, ok: true });
     }
 
-    createTransaction({
+    await createTransaction({
       id, user_id: user.id, reference, phone,
       email: user.email || `${user.phone}@topupng.local`, network, type,
       plan_code: plan_code || null, base_amount: baseAmountKobo, amount: amountKobo,
@@ -58,4 +58,4 @@ export async function POST(req) {
     console.error("create transaction error:", err.response?.data || err.message);
     return NextResponse.json({ error: "Could not start transaction" }, { status: 500 });
   }
-        }
+}
