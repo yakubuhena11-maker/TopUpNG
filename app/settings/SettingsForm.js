@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 export default function SettingsForm({ user }) {
@@ -19,6 +19,10 @@ export default function SettingsForm({ user }) {
   const [pinSuccess, setPinSuccess] = useState("");
   const [savingPin, setSavingPin] = useState(false);
   const hasPin = !!user.pin_hash;
+
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+  const fileInputRef = useRef(null);
 
   async function saveChanges() {
     setSaving(true);
@@ -76,6 +80,32 @@ export default function SettingsForm({ user }) {
     }
   }
 
+  async function handleAvatarChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAvatarError("");
+    setUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/user/avatar", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not upload image");
+
+      router.refresh();
+    } catch (err) {
+      setAvatarError(err.message);
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   async function handleLogout() {
     setLoggingOut(true);
     await fetch("/api/auth/logout", { method: "POST" });
@@ -84,6 +114,36 @@ export default function SettingsForm({ user }) {
 
   return (
     <>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handleAvatarChange}
+        />
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          style={{ cursor: "pointer", display: "inline-block", position: "relative" }}
+        >
+          {user.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt="Profile"
+              style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover" }}
+            />
+          ) : (
+            <div className="avatar" style={{ width: 72, height: 72, fontSize: 22 }}>
+              {name ? name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() : user.phone.slice(-2)}
+            </div>
+          )}
+          <div style={{ fontSize: 12, color: "var(--ink-soft)", marginTop: 6 }}>
+            {uploadingAvatar ? "Uploading…" : "Tap to change photo"}
+          </div>
+        </div>
+        {avatarError && <div className="error-text">{avatarError}</div>}
+      </div>
+
       <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
         <button
           onClick={() => setTab("details")}
