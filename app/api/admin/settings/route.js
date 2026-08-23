@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getAllSettings, setSetting } from "@/lib/db";
 
 export async function GET() {
-  const settings = getAllSettings();
+  const settings = await getAllSettings();
   return NextResponse.json({ settings });
 }
 
@@ -16,9 +16,9 @@ export async function PATCH(req) {
 
   for (const key of allowedKeys) {
     if (body[key] !== undefined) {
-      setSetting(key, body[key]);
+      await setSetting(key, body[key]);
     }
   }
 
-  return NextResponse.json({ ok: true, settings: getAllSettings() });
+  return NextResponse.json({ ok: true, settings: await getAllSettings() });
 }
