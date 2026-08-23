@@ -25,6 +25,7 @@ export default function BuyPage() {
   const [plan, setPlan] = useState(DATA_PLANS[1]);
   const [airtimeAmount, setAirtimeAmount] = useState(500);
   const [payMethod, setPayMethod] = useState("paystack");
+  const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -49,6 +50,7 @@ export default function BuyPage() {
           plan_code: type === "data" ? plan.code : null,
           amount,
           payment_method: payMethod,
+          pin,
         }),
       });
       const data = await res.json();
@@ -168,6 +170,18 @@ export default function BuyPage() {
           </div>
         </div>
         <p className="fineprint">Final price may include a small service fee.</p>
+
+        <div className="section-label">06 — Transaction PIN</div>
+        <div className="field">
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            placeholder="Enter your 4-digit PIN"
+            value={pin}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+          />
+        </div>
 
         {error && <div className="error-text">{error}</div>}
         <button className="btn" disabled={loading} onClick={pay}>
