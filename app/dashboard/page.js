@@ -71,7 +71,16 @@ export default async function DashboardPage({ searchParams }) {
     <div className="wrap">
       <div className="topbar">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div className="avatar">{initials(user.name, user.phone)}</div>
+          {user.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt="Profile"
+              className="avatar"
+              style={{ objectFit: "cover" }}
+            />
+          ) : (
+            <div className="avatar">{initials(user.name, user.phone)}</div>
+          )}
           <div>
             <div style={{ fontFamily: "'Space Grotesk'", fontWeight: 600, fontSize: 14.5 }}>
               Hi, {user.name ? user.name.split(" ")[0] : "there"}
