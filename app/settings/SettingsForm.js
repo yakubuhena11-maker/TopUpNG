@@ -143,11 +143,17 @@ export default function SettingsForm({ user }) {
           )}
         </div>
         <div>
-          <div className="name">{name || "Add your name"}</div>
-          <div className="phone">{user.phone}</div>
-          <div style={{ fontSize: 11, color: "var(--ink-soft)" }}>
-            {uploadingAvatar ? "Uploading…" : "Tap photo to change"}
+          <div
+            className="name"
+            onClick={() => setTab("details")}
+            style={{ cursor: !name ? "pointer" : "default" }}
+          >
+            {name || "Add your name"}
           </div>
+          <div className="phone">{user.phone}</div>
+          {uploadingAvatar && (
+            <div style={{ fontSize: 11, color: "var(--ink-soft)" }}>Uploading…</div>
+          )}
         </div>
       </div>
       {avatarError && <div className="error-text">{avatarError}</div>}
