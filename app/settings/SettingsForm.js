@@ -24,6 +24,11 @@ export default function SettingsForm({ user }) {
   const [avatarError, setAvatarError] = useState("");
   const fileInputRef = useRef(null);
 
+  function initials(n, phone) {
+    if (n) return n.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase();
+    return phone.slice(-2);
+  }
+
   async function saveChanges() {
     setSaving(true);
     try {
@@ -114,7 +119,7 @@ export default function SettingsForm({ user }) {
 
   return (
     <>
-      <div style={{ textAlign: "center", marginBottom: 20 }}>
+      <div className="profile-row" style={{ marginTop: 20, alignItems: "center" }}>
         <input
           type="file"
           accept="image/*"
@@ -124,27 +129,30 @@ export default function SettingsForm({ user }) {
         />
         <div
           onClick={() => fileInputRef.current?.click()}
-          style={{ cursor: "pointer", display: "inline-block", position: "relative" }}
+          style={{ cursor: "pointer", position: "relative" }}
         >
           {user.avatar_url ? (
             <img
               src={user.avatar_url}
               alt="Profile"
-              style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover" }}
+              className="avatar"
+              style={{ objectFit: "cover" }}
             />
           ) : (
-            <div className="avatar" style={{ width: 72, height: 72, fontSize: 22 }}>
-              {name ? name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() : user.phone.slice(-2)}
-            </div>
+            <div className="avatar">{initials(name, user.phone)}</div>
           )}
-          <div style={{ fontSize: 12, color: "var(--ink-soft)", marginTop: 6 }}>
-            {uploadingAvatar ? "Uploading…" : "Tap to change photo"}
+        </div>
+        <div>
+          <div className="name">{name || "Add your name"}</div>
+          <div className="phone">{user.phone}</div>
+          <div style={{ fontSize: 11, color: "var(--ink-soft)" }}>
+            {uploadingAvatar ? "Uploading…" : "Tap photo to change"}
           </div>
         </div>
-        {avatarError && <div className="error-text">{avatarError}</div>}
       </div>
+      {avatarError && <div className="error-text">{avatarError}</div>}
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+      <div style={{ display: "flex", gap: 8, marginTop: 20, marginBottom: 20 }}>
         <button
           onClick={() => setTab("details")}
           className={tab === "details" ? "btn" : "btn ghost"}
