@@ -24,6 +24,12 @@ export default function SettingsForm({ user }) {
   const [avatarError, setAvatarError] = useState("");
   const fileInputRef = useRef(null);
 
+  const [sendingEmailOtp, setSendingEmailOtp] = useState(false);
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [emailOtpCode, setEmailOtpCode] = useState("");
+  const [emailVerifyError, setEmailVerifyError] = useState("");
+  const [verifyingEmail, setVerifyingEmail] = useState(false);
+
   function initials(n, phone) {
     if (n) return n.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase();
     return phone.slice(-2);
@@ -43,6 +49,46 @@ export default function SettingsForm({ user }) {
       alert(err.message);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function sendEmailOtp() {
+    setEmailVerifyError("");
+    setSendingEmailOtp(true);
+    try {
+      const res = await fetch("/api/auth/send-email-otp", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not send code");
+      setEmailOtpSent(true);
+    } catch (err) {
+      setEmailVerifyError(err.message);
+    } finally {
+      setSendingEmailOtp(false);
+    }
+  }
+
+  async function verifyEmailOtp() {
+    setEmailVerifyError("");
+    if (!/^\d{6}$/.test(emailOtpCode)) {
+      setEmailVerifyError("Enter the 6-digit code");
+      return;
+    }
+    setVerifyingEmail(true);
+    try {
+      const res = await fetch("/api/auth/verify-email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: emailOtpCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not verify code");
+      setEmailOtpSent(false);
+      setEmailOtpCode("");
+      router.refresh();
+    } catch (err) {
+      setEmailVerifyError(err.message);
+    } finally {
+      setVerifyingEmail(false);
     }
   }
 
@@ -117,6 +163,8 @@ export default function SettingsForm({ user }) {
     router.push("/login");
   }
 
+  const emailChanged = email !== (user.email || "");
+
   return (
     <>
       <div className="profile-row" style={{ marginTop: 20, alignItems: "center" }}>
@@ -184,6 +232,15 @@ export default function SettingsForm({ user }) {
           <div className="field">
             <label>Email</label>
             <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+            {user.email && !emailChanged && (
+              <div style={{ fontSize: 12, marginTop: 4 }}>
+                {user.email_verified ? (
+                  <span style={{ color: "green" }}>✓ Verified</span>
+                ) : (
+                  <span style={{ color: "var(--ink-soft)" }}>Not verified</span>
+                )}
+              </div>
+            )}
           </div>
           <div className="field">
             <label>Phone number</label>
@@ -192,6 +249,33 @@ export default function SettingsForm({ user }) {
           <button className="btn ghost" disabled={saving} onClick={saveChanges}>
             {saving ? "Saving…" : "Save changes"}
           </button>
+
+          {user.email && !emailChanged && !user.email_verified && (
+            <div style={{ marginTop: 16 }}>
+              {!emailOtpSent ? (
+                <button className="btn ghost" disabled={sendingEmailOtp} onClick={sendEmailOtp}>
+                  {sendingEmailOtp ? "Sending…" : "Verify email"}
+                </button>
+              ) : (
+                <>
+                  <div className="field">
+                    <label>Enter the code sent to your email</label>
+                    <input
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={emailOtpCode}
+                      onChange={(e) => setEmailOtpCode(e.target.value.replace(/\D/g, ""))}
+                      placeholder="123456"
+                    />
+                  </div>
+                  {emailVerifyError && <div className="error-text">{emailVerifyError}</div>}
+                  <button className="btn ghost" disabled={verifyingEmail} onClick={verifyEmailOtp}>
+                    {verifyingEmail ? "Verifying…" : "Confirm code"}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
 
