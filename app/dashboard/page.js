@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { v4 as uuidv4 } from "uuid";
 import { getCurrentUser } from "@/lib/auth";
-import { listTransactions, getTransaction, updateTransactionStatus } from "@/lib/db";
+import { listTransactions, getTransaction, updateTransactionStatus, createNotification } from "@/lib/db";
 import { verifyPayment } from "@/lib/paystack";
 import { purchaseAirtime, purchaseData } from "@/lib/vtpass";
 import WalletActions from "./WalletActions";
+import NotificationsBell from "./NotificationsBell";
 
 function initials(name, phone) {
   if (name) return name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
@@ -25,6 +27,13 @@ async function tryCompleteTransaction(reference) {
       const result = await verifyPayment(reference);
       if (result.data.status !== "success") {
         await updateTransactionStatus(reference, "failed");
+        await createNotification({
+          id: uuidv4(),
+          user_id: tx.user_id,
+          type: "purchase_failed",
+          title: "Purchase failed",
+          message: `Your ${tx.network.toUpperCase()} ${tx.type} purchase of ${formatNaira(tx.amount)} was not successful.`,
+        });
         return;
       }
     }
@@ -50,9 +59,24 @@ async function tryCompleteTransaction(reference) {
     await updateTransactionStatus(reference, "success", {
       vtpass_ref: vtpassResult?.content?.transactions?.transactionId || null,
     });
+
+    await createNotification({
+      id: uuidv4(),
+      user_id: tx.user_id,
+      type: "purchase_success",
+      title: "Purchase successful",
+      message: `Your ${tx.network.toUpperCase()} ${tx.type} purchase of ${formatNaira(tx.amount)} was delivered to ${tx.phone}.`,
+    });
   } catch (err) {
     console.error("dashboard auto-verify error:", err.response?.data || err.message);
     await updateTransactionStatus(reference, "failed");
+    await createNotification({
+      id: uuidv4(),
+      user_id: tx.user_id,
+      type: "purchase_failed",
+      title: "Purchase failed",
+      message: `Your ${tx.network.toUpperCase()} ${tx.type} purchase of ${formatNaira(tx.amount)} could not be completed.`,
+    });
   }
 }
 
@@ -85,7 +109,10 @@ export default async function DashboardPage({ searchParams }) {
             Hi, {user.name ? user.name.split(" ")[0] : "there"}
           </div>
         </Link>
-        <Link href="/settings" className="gear">⚙</Link>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <NotificationsBell />
+          <Link href="/settings" className="gear">⚙</Link>
+        </div>
       </div>
 
       <div className="wallet-card">
