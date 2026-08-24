@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { saveOtp } from "@/lib/db";
 import { generateOtpCode, otpExpiryIso } from "@/lib/auth";
+import { sendOtpEmail } from "@/lib/email";
 
 export async function POST() {
   try {
@@ -14,7 +15,7 @@ export async function POST() {
     const expiresAt = otpExpiryIso(5);
     await saveOtp(user.email, code, expiresAt);
 
-    console.log(`Email OTP for ${user.email}: ${code}`);
+    await sendOtpEmail(user.email, code);
 
     return NextResponse.json({ ok: true });
   } catch (err) {
