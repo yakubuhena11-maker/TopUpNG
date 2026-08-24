@@ -70,7 +70,7 @@ export default async function DashboardPage({ searchParams }) {
   return (
     <div className="wrap">
       <div className="topbar">
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Link href="/settings" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", color: "inherit" }}>
           {user.avatar_url ? (
             <img
               src={user.avatar_url}
@@ -81,13 +81,10 @@ export default async function DashboardPage({ searchParams }) {
           ) : (
             <div className="avatar">{initials(user.name, user.phone)}</div>
           )}
-          <div>
-            <div style={{ fontFamily: "'Space Grotesk'", fontWeight: 600, fontSize: 14.5 }}>
-              Hi, {user.name ? user.name.split(" ")[0] : "there"}
-            </div>
-            <div style={{ fontSize: 11.5, color: "var(--ink-soft)" }}>{user.phone}</div>
+          <div style={{ fontFamily: "'Space Grotesk'", fontWeight: 600, fontSize: 14.5 }}>
+            Hi, {user.name ? user.name.split(" ")[0] : "there"}
           </div>
-        </div>
+        </Link>
         <Link href="/settings" className="gear">⚙</Link>
       </div>
 
