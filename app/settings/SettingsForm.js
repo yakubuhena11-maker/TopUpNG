@@ -268,12 +268,12 @@ export default function SettingsForm({ user }) {
                       placeholder="123456"
                     />
                   </div>
-                  {emailVerifyError && <div className="error-text">{emailVerifyError}</div>}
                   <button className="btn ghost" disabled={verifyingEmail} onClick={verifyEmailOtp}>
                     {verifyingEmail ? "Verifying…" : "Confirm code"}
                   </button>
                 </>
               )}
+              {emailVerifyError && <div className="error-text" style={{ marginTop: 8 }}>{emailVerifyError}</div>}
             </div>
           )}
         </div>
