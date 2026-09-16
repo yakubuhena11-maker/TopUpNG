@@ -6,7 +6,7 @@ import { listTransactions, getTransaction, updateTransactionStatus, createNotifi
 import { verifyPayment } from "@/lib/paystack";
 import { purchaseAirtime, purchaseData } from "@/lib/vtpass";
 import WalletActions from "./WalletActions";
-import NotificationsBell from "./NotificationsBell";
+import NotificationsBell from "../app/dashboard/NotificationsBell";
 
 function initials(name, phone) {
   if (name) return name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
