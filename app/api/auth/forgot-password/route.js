@@ -21,9 +21,7 @@ export async function POST(req) {
 
     return NextResponse.json({
       ok: true,
-      message: exposeResetLinks
-        ? "Reset link generated. It is shown below for temporary testing."
-        : "Reset link generated. Check the server logs in development.",
+      message: exposeResetLinks ? "Reset link generated. It is shown below for temporary testing." : "Reset link generated. Check the server logs in development.",
       ...(exposeResetLinks ? { resetUrl } : {}),
     });
   } catch (err) {
