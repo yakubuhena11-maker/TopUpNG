@@ -6,10 +6,16 @@ import { verifyPassword } from "@/lib/password";
 export async function POST(req) {
   try {
     const { phone, password } = await req.json();
-    const user = await getPasswordUserByPhone(normalizePhone(phone));
-    if (!user || user.is_active === false || !verifyPassword(password, user.password)) {
+    const cleanPhone = normalizePhone(phone);
+    const user = await getPasswordUserByPhone(cleanPhone);
+
+    if (!user || user.is_active === false) {
       return NextResponse.json({ error: "Invalid phone number or password" }, { status: 401 });
     }
+    if (!password || !user.password || !verifyPassword(String(password), user.password)) {
+      return NextResponse.json({ error: "Invalid phone number or password" }, { status: 401 });
+    }
+
     await createUserSession(user.id);
     return NextResponse.json({ ok: true });
   } catch (err) {
